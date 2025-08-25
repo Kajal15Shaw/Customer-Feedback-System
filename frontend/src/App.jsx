@@ -4,26 +4,37 @@ import FeedbackList from './components/FeedbackList';
 import FeedbackStats from './components/FeedbackStats';
 import './App.css';
 
+// Use environment-based backend URL
+const API_URL =
+  process.env.NODE_ENV === "production"
+    ? "https://customer-feedback-system-f1az.onrender.com" // <-- replace with your deployed backend URL
+    : "http://localhost:5000";
+
 function App() {
   const [feedback, setFeedback] = useState([]);
 
   useEffect(() => {
-  fetch('http://localhost:5000/api/feedback')
-    .then(res => res.json())
-    .then(data => {
-      console.log('Fetched data:', data);
-      setFeedback(data);
-    });
-}, []);
+    fetch(`${API_URL}/api/feedback`)
+      .then(res => res.json())
+      .then(data => {
+        console.log('Fetched data:', data);
+        setFeedback(data);
+      })
+      .catch(err => console.error("Failed to fetch feedback:", err));
+  }, []);
 
   const addFeedback = async (entry) => {
-    const res = await fetch('http://localhost:5000/api/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entry),
-    });
-    const newFeedback = await res.json();
-    setFeedback(prev => [newFeedback, ...prev]);
+    try {
+      const res = await fetch(`${API_URL}/api/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry),
+      });
+      const newFeedback = await res.json();
+      setFeedback(prev => [newFeedback, ...prev]);
+    } catch (err) {
+      console.error("Failed to add feedback:", err);
+    }
   };
 
   return (
